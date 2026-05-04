@@ -1,3 +1,3 @@
-source tui/echo2.sh
+source tui/mdecho.sh
 source tui/setup.sh
 setupTerminal

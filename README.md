@@ -15,5 +15,17 @@ echo2 "Hallo {mUser} wie geht es dir?"
 output (User wird blau sien, {m} als markirung gedacht):
 Hallo User wie geht es dir?
 
-### dependency
-- [ ] glow | https://github.com/charmbracelet/glow
+#### dependency
+
+
+---
+
+## Project:
+- 1 Script (instalation und programm)
+- kein .md im terminal
+- setings:
+    - haupt folder
+    - User name
+    - 
+- .link in windows menu
+- 

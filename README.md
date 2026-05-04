@@ -1,7 +1,12 @@
 ### Important paths
-- `C:\Users\<user name>\AppData\Roaming` | benutzer einstellungen
-- `C:\Users\<user name>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs` | Program verlinkung
-- `C:\Users\<user name>\AppData\Local\Programs\` | Program Code
+#### Linux
+- `/etc/Automatic-Note-File-Generator` | Benutzereinstellungen
+- `/bin/Automatic-Note-File-Generator` | Programcode
+
+#### Windows
+- `C:\Users\<user name>\AppData\Roaming` | benutzereinstellungen
+- `C:\Users\<user name>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs` | Programverlinkung
+- `C:\Users\<user name>\AppData\Local\Programs\` | Programcode
 
 ### echo2
 code:

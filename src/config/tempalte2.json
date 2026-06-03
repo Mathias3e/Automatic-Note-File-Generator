@@ -1,0 +1,21 @@
+{
+  "id": "4f5fd698-5fa5-4ec7-9998-7cfeb380069d",
+  "aktive": false,
+  "name": "Scedulle 2",
+  "tamplate": "template 1",
+  "date": {
+    "start": "03-06-2026",
+    "end": "03-07-2026"
+  },
+  "repetition": {
+    "advanced": false,
+    "type": "monthly",
+    "day_offset": null,
+    "interval": null
+  },
+  "variabels": {
+    "modul": "Something",
+    "lehrer": "-",
+    "projekt": "Hail Mary"
+  }
+}

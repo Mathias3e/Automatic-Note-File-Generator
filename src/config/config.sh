@@ -5,10 +5,14 @@ function addVariabelsToConfig {
     jq --arg k "$2" --arg v "$3" '.variabels += {($k): $v}' $1.json > tmp.json && mv tmp.json $1.json
 }
 
+function removeVariabelsFromConfig {
+    jq --arg k "$2" 'del(.variabels[$k])' "$1.json" > tmp.json && mv tmp.json "$1.json"
+}
+
 function createNewConfig {
     local id
     id=$(uuidgen | tr 'A-Z' 'a-z')
-    id="123"
+    # id=123
     cat << EOF > "$id.json"
 {
     "id": "$id",
@@ -30,15 +34,20 @@ function createNewConfig {
     }
 }
 EOF
+echo $id
 }
 
 function editConfig {
-    echo "hallo"
+    jq --arg v "$3" --arg k "$2" '.[$k] = $v' "$1.json" > tmp.json && mv tmp.json "$1.json"
 }
 
 function deleteConfig {
-    echo "hallo"
+    rm $1.json
 }
 
-createNewConfig true "Schedule 1" "template 1" "03-06-2026" null true 2 2 3
-addVariabelsToConfig 123 modul M122
+# createNewConfig true "Schedule 1" "template 2" "03-06-2026" null true 2 2 3
+# addVariabelsToConfig 123 modul M122
+# addVariabelsToConfig 123 test del
+# removeVariabelsFromConfig 123 test
+# editConfig 123 tamplate "tamplate 2"
+# deleteConfig 123

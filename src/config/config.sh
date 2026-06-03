@@ -1,9 +1,14 @@
 # daily weekly monthly yearly
 # 1     2      3       4
 
+function addVariabelsToConfig {
+    jq --arg k "$2" --arg v "$3" '.variabels += {($k): $v}' $1.json > tmp.json && mv tmp.json $1.json
+}
+
 function createNewConfig {
     local id
     id=$(uuidgen | tr 'A-Z' 'a-z')
+    id="123"
     cat << EOF > "$id.json"
 {
     "id": "$id",
@@ -36,3 +41,4 @@ function deleteConfig {
 }
 
 createNewConfig true "Schedule 1" "template 1" "03-06-2026" null true 2 2 3
+addVariabelsToConfig 123 modul M122

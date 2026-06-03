@@ -1,0 +1,19 @@
+{
+  "id": "123",
+  "aktive": true,
+  "name": "Schedule 1",
+  "tamplate": "template 1",
+  "date": {
+    "start": "03-06-2026",
+    "end": null
+  },
+  "repetition": {
+    "advanced": true,
+    "type": 2,
+    "day_offset": 2,
+    "interval": 3
+  },
+  "variabels": {
+    "modul": "M122"
+  }
+}

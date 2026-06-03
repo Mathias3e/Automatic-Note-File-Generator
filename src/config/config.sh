@@ -10,24 +10,22 @@ function removeVariabelsFromConfig {
 }
 
 function createNewConfig {
-    local id
-    id=$(uuidgen | tr 'A-Z' 'a-z')
-    # id=123
-    cat << EOF > "$id.json"
+    cat << EOF > "$1.json"
 {
-    "id": "$id",
-    "aktive": $1,
-    "name": "$2",
-    "tamplate": "$3",
+    "config_id": "$1",
+    "aktive": $2,
+    "name": "$3",
+    "tamplate": "$4",
+    "destination": "$5",
     "date": {
-        "start": "$4",
-        "end": $5
+        "start": "$6",
+        "end": $7
     },
     "repetition": {
-        "advanced": $6,
-        "type": $7,
-        "day_offset": $8,
-        "interval": $9
+        "advanced": $8,
+        "type": $9,
+        "day_offset": $10,
+        "interval": $11
     },
     "variabels": {
         
@@ -45,7 +43,7 @@ function deleteConfig {
     rm $1.json
 }
 
-# createNewConfig true "Schedule 1" "template 2" "03-06-2026" null true 2 2 3
+# createNewConfig true "M122_Config" "M122_{{date}}" "template 2" "D:/03BBZW/02Semester/M122/Notes" "03-06-2026" null true 2 2 3
 # addVariabelsToConfig 123 modul M122
 # addVariabelsToConfig 123 test del
 # removeVariabelsFromConfig 123 test

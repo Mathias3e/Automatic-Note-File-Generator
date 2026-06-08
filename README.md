@@ -28,4 +28,27 @@ Hallo User wie geht es dir?
     - User name
     - 
 - .link in windows menu
-- 
+
+## Ordner Strucktur
+```
+Haupt Ordner/
+├─ src/
+|  ├─ tui/
+|  |  └─ ...
+|  ├─ installation/
+|  |  └─ ...
+|  ├─ background/
+|  |  └─ ...
+|  ├─ config/
+|  |  └─ ...
+|  └─ main/
+|     └─ ...
+├─ configs/
+|  ├─ config1.json
+|  ├─ config2.json
+|  └─ ...
+└─ templates/
+   ├─ template1.md
+   ├─ template2.md
+   └─ ...
+```

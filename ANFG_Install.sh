@@ -20,3 +20,8 @@ if ! sudo -n true 2>/dev/null; then
 fi
 update_apt
 installDependency "jq"
+installDependency "nano"
+installCron
+
+mkdir -p templates configs configs/.state
+chmod +x ANFG.sh

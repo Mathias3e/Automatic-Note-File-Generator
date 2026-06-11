@@ -1,0 +1,13 @@
+{
+  "config_id": "dfse",
+  "name": "dfse",
+  "active": true,
+  "template": "Template_BBZW.md",
+  "destination": "/root/log",
+  "filename": "{{date}}_Notiz.md",
+  "schedule": {
+    "preset": "custom",
+    "cron": "*"
+  },
+  "variables": {}
+}

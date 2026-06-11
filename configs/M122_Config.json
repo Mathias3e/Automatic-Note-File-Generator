@@ -1,0 +1,16 @@
+{
+  "config_id": "M122_Config",
+  "name": "Scedulle 1",
+  "active": true,
+  "template": "Template_BBZW.md",
+  "destination": "/root/Notes/M122",
+  "filename": "{{date}}_M122.md",
+  "schedule": {
+    "preset": "weekly",
+    "cron": "0 7 * * 1"
+  },
+  "variables": {
+    "modul": "M122",
+    "lehrer": "Schweizer Christian"
+  }
+}

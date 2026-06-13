@@ -1,0 +1,13 @@
+{
+  "config_id": "M431",
+  "name": "M431",
+  "active": true,
+  "template": "Template_BBZW.md",
+  "destination": "/home/leon/Automatic-Note-File-Generator",
+  "filename": "{{date}}_Notiz.md",
+  "schedule": {
+    "preset": "weekly",
+    "cron": "0 7 * * 4"
+  },
+  "variables": {}
+}

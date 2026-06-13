@@ -16,7 +16,6 @@ source "$ANFG_HOME/src/config/config.sh"
 source "$ANFG_HOME/src/cron/cron.sh"
 source "$ANFG_HOME/src/generator/placeholders.sh"
 source "$ANFG_HOME/src/generator/generate.sh"
-source "$ANFG_HOME/src/tui/templates_menu.sh"
 source "$ANFG_HOME/src/tui/configs_menu.sh"
 source "$ANFG_HOME/src/tui/menu.sh"
 

@@ -8,7 +8,12 @@
 #   "template": "Template_BBZW.md" | "/abs/path/to/template.md",
 #   "destination": "/abs/path/to/folder",
 #   "filename": "{{date}}_M122.md",
-#   "schedule": { "preset": "hourly|daily|weekly|monthly|custom", "cron": "* * * * *" },
+#   "schedule": { "preset": "daily|weekly|monthly|custom", "cron": "@reboot" | "* * * * *", "day": "" },
+#     - for "weekly", day is 0-6 (Sonntag=0 .. Samstag=6)
+#     - for "monthly", day is the day-of-month (1-31)
+#     - "daily"/"weekly"/"monthly" run "@reboot" and rely on generateFromConfig's
+#       day check + the existing-file skip to fire once, as early as possible, on
+#       the right day
 #   "variables": { "key": "value", ... }
 # }
 
@@ -37,7 +42,7 @@ function createConfig {
             template: $template,
             destination: $destination,
             filename: $filename,
-            schedule: { preset: $preset, cron: $cron },
+            schedule: { preset: $preset, cron: $cron, day: "" },
             variables: {}
         }' > "$CONFIGS_DIR/$id.json"
 }
@@ -64,9 +69,9 @@ function setConfigField {
     _updateConfigJson "$1" --arg v "$3" "$2 = \$v"
 }
 
-# setConfigSchedule ID PRESET CRON
+# setConfigSchedule ID PRESET CRON DAY
 function setConfigSchedule {
-    _updateConfigJson "$1" --arg preset "$2" --arg cron "$3" '.schedule = {preset: $preset, cron: $cron}'
+    _updateConfigJson "$1" --arg preset "$2" --arg cron "$3" --arg day "$4" '.schedule = {preset: $preset, cron: $cron, day: $day}'
 }
 
 # addVariable ID KEY VALUE

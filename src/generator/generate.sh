@@ -10,6 +10,19 @@ function generateFromConfig {
         return 1
     fi
 
+    local preset day
+    preset=$(getConfigField "$id" '.schedule.preset')
+    day=$(getConfigField "$id" '.schedule.day')
+
+    case "$preset" in
+        weekly)
+            [[ -n "$day" && "$day" != "null" && "$(date +%w)" != "$day" ]] && return 0
+            ;;
+        monthly)
+            [[ -n "$day" && "$day" != "null" && "$((10#$(date +%d)))" != "$((10#$day))" ]] && return 0
+            ;;
+    esac
+
     local template destination filename
     template=$(getConfigField "$id" '.template')
     destination=$(getConfigField "$id" '.destination')

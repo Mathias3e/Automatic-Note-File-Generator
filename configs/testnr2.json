@@ -1,0 +1,16 @@
+{
+  "config_id": "testnr2",
+  "name": "testnr2",
+  "active": true,
+  "template": "Template_BBZW.md",
+  "destination": "/root/M122Test",
+  "filename": "{{date}}_juhu2z.md",
+  "schedule": {
+    "preset": "daily",
+    "cron": "@reboot",
+    "day": ""
+  },
+  "variables": {
+    "Lehrer": "VUD"
+  }
+}

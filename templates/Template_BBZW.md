@@ -3,6 +3,7 @@ autor:
   - Leon Waser
 Datum: "{{date}}"
 tags:
+  - {{Lehrer}}
   - BBZW
 ---
 

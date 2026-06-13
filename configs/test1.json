@@ -1,0 +1,13 @@
+{
+  "config_id": "test1",
+  "name": "test1",
+  "active": true,
+  "template": "Template_BBZW.md",
+  "destination": "/root/Automatic-Note-File-Generator",
+  "filename": "{{date}}_jhuih.md",
+  "schedule": {
+    "preset": "daily",
+    "cron": "0 7 * * *"
+  },
+  "variables": {}
+}

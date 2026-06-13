@@ -7,10 +7,10 @@ function applyPlaceholders {
     local text="$1" config_id="$2"
     local d t ts dt
 
-    d=$(date +%d.%m.%Y)
+    d=$(date +%Y-%m-%d)
     t=$(date +%H:%M:%S)
     ts=$(date +%H:%M)
-    dt=$(date +"%H:%M %d.%m.%Y")
+    dt=$(date +"%Y-%m-%d %H:%M")
 
     text="${text//\{\{date\}\}/$d}"
     text="${text//\{\{time\}\}/$t}"

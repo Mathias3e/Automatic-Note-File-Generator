@@ -1,6 +1,6 @@
 # Config management: list/create/edit configs, schedule and variables.
 
-function configsMenu {
+function editConfigMenu {
     while true; do
         local ids=() labels=()
         while IFS= read -r id; do
@@ -14,15 +14,38 @@ function configsMenu {
             labels+=("$marker $name ($id)")
         done < <(listConfigIds)
 
-        local options=("${labels[@]}" "+ Neue Config" "Zurück")
+        local options=("${labels[@]}" "Zurück")
         local choice
-        choice=$(menu_select "Configs" "${options[@]}") || return
+        choice=$(menu_select "Config bearbeiten" "${options[@]}") || return
 
         local count=${#ids[@]}
         if (( choice < count )); then
             configDetailMenu "${ids[$choice]}"
-        elif (( choice == count )); then
-            newConfigWizard
+        else
+            return
+        fi
+    done
+}
+
+function deleteConfigMenu {
+    while true; do
+        local ids=() labels=()
+        while IFS= read -r id; do
+            [[ -z "$id" ]] && continue
+            ids+=("$id")
+            labels+=("$(getConfigField "$id" '.name') ($id)")
+        done < <(listConfigIds)
+
+        local options=("${labels[@]}" "Zurück")
+        local choice
+        choice=$(menu_select "Config löschen" "${options[@]}") || return
+
+        local count=${#ids[@]}
+        if (( choice < count )); then
+            local id="${ids[$choice]}" name="${labels[$choice]}"
+            if confirm "Config '$name' wirklich löschen?"; then
+                deleteConfig "$id"
+            fi
         else
             return
         fi
@@ -84,13 +107,30 @@ function configDetailMenu {
     while true; do
         [[ -f "$CONFIGS_DIR/$id.json" ]] || return
 
-        local name active template destination filename cron status
+        local name active template destination filename preset day status schedule_label
         name=$(getConfigField "$id" '.name')
         active=$(getConfigField "$id" '.active')
         template=$(getConfigField "$id" '.template')
         destination=$(getConfigField "$id" '.destination')
         filename=$(getConfigField "$id" '.filename')
-        cron=$(getConfigField "$id" '.schedule.cron')
+        preset=$(getConfigField "$id" '.schedule.preset')
+        day=$(getConfigField "$id" '.schedule.day')
+
+        local weekdays=(Sonntag Montag Dienstag Mittwoch Donnerstag Freitag Samstag)
+        [[ "$day" == "null" ]] && day=""
+        case "$preset" in
+            daily) schedule_label="Täglich, sobald möglich" ;;
+            weekly)
+                if [[ "$day" =~ ^[0-6]$ ]]; then
+                    schedule_label="Wöchentlich (${weekdays[$day]}), sobald möglich"
+                else
+                    schedule_label="Wöchentlich, sobald möglich"
+                fi
+                ;;
+            monthly) schedule_label="Monatlich (Tag ${day:-?}), sobald möglich" ;;
+            custom) schedule_label="Eigener Cron-Ausdruck ($(getConfigField "$id" '.schedule.cron'))" ;;
+            *) schedule_label="(kein)" ;;
+        esac
 
         status="Inaktiv"
         [[ "$active" == "true" ]] && status="Aktiv"
@@ -101,10 +141,9 @@ function configDetailMenu {
             "Template: $template" \
             "Zielordner: $destination" \
             "Dateiname: $filename" \
-            "Zeitplan: ${cron:-(kein)}" \
+            "Zeitplan: $schedule_label" \
             "Variablen verwalten" \
             "Aktiv/Inaktiv umschalten ($status)" \
-            "Config löschen" \
             "Zurück") || return
 
         case "$choice" in
@@ -141,13 +180,7 @@ function configDetailMenu {
                     setActive "$id" "true"
                 fi
                 ;;
-            7)
-                if confirm "Config '$name' wirklich löschen?"; then
-                    deleteConfig "$id"
-                    return
-                fi
-                ;;
-            8) return ;;
+            7) return ;;
         esac
     done
 }
@@ -155,45 +188,32 @@ function configDetailMenu {
 function scheduleMenu {
     local id="$1"
     local choice
-    choice=$(menu_select "Zeitplan wählen" "Stündlich" "Täglich" "Wöchentlich" "Monatlich" "Eigener Cron-Ausdruck" "Abbrechen") || return
+    choice=$(menu_select "Zeitplan wählen" "Täglich" "Wöchentlich" "Monatlich" "Eigener Cron-Ausdruck" "Abbrechen") || return
 
-    local preset cron
+    local preset cron day=""
     case "$choice" in
         0)
-            preset="hourly"
-            cron="0 * * * *"
+            preset="daily"
+            cron="@reboot"
             ;;
         1)
-            local hh h m
-            hh=$(text_input "Uhrzeit (HH:MM):" "07:00")
-            h=${hh%%:*}; m=${hh##*:}
-            preset="daily"
-            cron="$((10#$m)) $((10#$h)) * * *"
+            day=$(menu_select "Wochentag" "Sonntag" "Montag" "Dienstag" "Mittwoch" "Donnerstag" "Freitag" "Samstag") || return
+            preset="weekly"
+            cron="@reboot"
             ;;
         2)
-            local day hh h m
-            day=$(menu_select "Wochentag" "Sonntag" "Montag" "Dienstag" "Mittwoch" "Donnerstag" "Freitag" "Samstag") || return
-            hh=$(text_input "Uhrzeit (HH:MM):" "07:00")
-            h=${hh%%:*}; m=${hh##*:}
-            preset="weekly"
-            cron="$((10#$m)) $((10#$h)) * * $day"
+            day=$(text_input "Tag im Monat (1-31):" "1")
+            preset="monthly"
+            cron="@reboot"
             ;;
         3)
-            local dom hh h m
-            dom=$(text_input "Tag im Monat (1-31):" "1")
-            hh=$(text_input "Uhrzeit (HH:MM):" "07:00")
-            h=${hh%%:*}; m=${hh##*:}
-            preset="monthly"
-            cron="$((10#$m)) $((10#$h)) $((10#$dom)) * *"
-            ;;
-        4)
             cron=$(text_input "Cron-Ausdruck (Min Std Tag Monat Wochentag):" "* * * * *")
             preset="custom"
             ;;
-        5) return ;;
+        4) return ;;
     esac
 
-    setConfigSchedule "$id" "$preset" "$cron"
+    setConfigSchedule "$id" "$preset" "$cron" "$day"
     syncCronForConfig "$id"
 }
 

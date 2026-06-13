@@ -1,0 +1,16 @@
+{
+  "config_id": "neu",
+  "name": "neu",
+  "active": true,
+  "template": "Template_BBZW.md",
+  "destination": "/root/M122Test",
+  "filename": "{{date}}_neu1.md",
+  "schedule": {
+    "preset": "daily",
+    "cron": "@reboot",
+    "day": ""
+  },
+  "variables": {
+    "Lehrer": "Christian"
+  }
+}

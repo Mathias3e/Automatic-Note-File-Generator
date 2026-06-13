@@ -1,0 +1,17 @@
+{
+  "config_id": "Something_Config",
+  "name": "Scedulle 2",
+  "active": false,
+  "template": "Template_BBZW.md",
+  "destination": "/root/Notes/Something",
+  "filename": "{{date}}_Something.md",
+  "schedule": {
+    "preset": "monthly",
+    "cron": "0 7 1 * *"
+  },
+  "variables": {
+    "modul": "Something",
+    "lehrer": "-",
+    "projekt": "Hail Mary"
+  }
+}

@@ -35,13 +35,21 @@ function Sync-ScheduledTaskForConfig {
     param([string]$Id)
 
     $taskName = Get-AnfgTaskName $Id
-    Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+    $existingTask = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
 
     $config = Get-Config $Id
-    if (-not $config.active) { return }
-
     $preset = $config.schedule.preset
-    if (-not $preset -or $preset -eq "null") { return }
+    $needsTask = $config.active -and $preset -and $preset -ne "null"
+
+    if (-not $needsTask) {
+        if ($existingTask) {
+            Write-Host "$($global:C4)Geplante Aufgabe wird entfernt ...$($global:CR)"
+            Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+        }
+        return
+    }
+
+    Write-Host "$($global:C4)Geplante Aufgabe wird aktualisiert ...$($global:CR)"
 
     if ($preset -eq "custom") {
         Write-MdEcho "Hinweis: {mEigener Cron-Ausdruck} wird unter Windows nicht uebersetzt - Task '$taskName' laeuft taeglich bei Anmeldung."

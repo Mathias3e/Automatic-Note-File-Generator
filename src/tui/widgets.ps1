@@ -51,23 +51,63 @@ function Menu-Select {
 }
 
 # Text-Input PROMPT [DEFAULT]
-# Returns the entered value. Empty input returns DEFAULT (if given) or "".
-#
-# NOT PORTED: bash's "read -i" pre-fills the input line with DEFAULT so the
-# user can edit it in place. PowerShell's Read-Host has no equivalent, so the
-# default is only shown as a hint and used when the user presses Enter
-# without typing anything.
+# Shows the prompt in color, pre-fills DEFAULT (editable in place, like bash's
+# "read -i"), and returns the final text. Enter without typing anything
+# returns DEFAULT.
 function Text-Input {
     param(
         [string]$Prompt,
         [string]$Default = ""
     )
 
-    $hint = if ($Default) { " [$Default]" } else { "" }
-    Write-Host -NoNewline "$($global:C2)$Prompt$hint$($global:CR) "
-    $value = Read-Host
-    if ([string]::IsNullOrEmpty($value)) { return $Default }
-    return $value
+    Write-Host -NoNewline "$($global:C2)$Prompt$($global:CR) "
+    $startLeft = [Console]::CursorLeft
+    $startTop = [Console]::CursorTop
+
+    $chars = [System.Collections.Generic.List[char]]::new()
+    if ($Default) { [void]$chars.AddRange([char[]]$Default) }
+    $pos = $chars.Count
+
+    [Console]::CursorVisible = $true
+    try {
+        while ($true) {
+            [Console]::SetCursorPosition($startLeft, $startTop)
+            Write-Host -NoNewline "`e[K$(-join $chars)"
+            [Console]::SetCursorPosition($startLeft + $pos, $startTop)
+
+            $key = [Console]::ReadKey($true)
+            switch ($key.Key) {
+                'Enter' {
+                    Write-Host ""
+                    $value = -join $chars
+                    if ([string]::IsNullOrEmpty($value)) { return $Default }
+                    return $value
+                }
+                'Backspace' {
+                    if ($pos -gt 0) {
+                        $chars.RemoveAt($pos - 1)
+                        $pos--
+                    }
+                }
+                'Delete' {
+                    if ($pos -lt $chars.Count) { $chars.RemoveAt($pos) }
+                }
+                'LeftArrow' { if ($pos -gt 0) { $pos-- } }
+                'RightArrow' { if ($pos -lt $chars.Count) { $pos++ } }
+                'Home' { $pos = 0 }
+                'End' { $pos = $chars.Count }
+                default {
+                    $ch = $key.KeyChar
+                    if ($ch -and [int]$ch -ge 32) {
+                        $chars.Insert($pos, $ch)
+                        $pos++
+                    }
+                }
+            }
+        }
+    } finally {
+        [Console]::CursorVisible = $false
+    }
 }
 
 # Confirm-Action PROMPT

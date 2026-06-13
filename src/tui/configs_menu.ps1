@@ -87,7 +87,7 @@ function New-ConfigWizard {
     $filename = Text-Input "Dateinamen-Muster (z.B. {{date}}_Notiz.md):" "{{date}}_Notiz.md"
 
     New-Config -Id $id -Name $name -Active $false -Template $template -Destination $destination -Filename $filename -Preset "custom" -Cron ""
-    Set-ScheduleMenu -Id $id
+    Set-ScheduleMenu -Id $id -SkipSync
 
     if (Confirm-Action "Config '$name' jetzt aktivieren?") {
         Set-ConfigActive -Id $id -Active $true
@@ -171,7 +171,7 @@ function Format-ScheduleLabel {
 # tasks run "as early as possible" (see scheduler.ps1 for what that means on
 # Windows).
 function Set-ScheduleMenu {
-    param([string]$Id)
+    param([string]$Id, [switch]$SkipSync)
 
     $choice = Menu-Select -Title "Zeitplan wählen" -Options @("Täglich", "Wöchentlich", "Monatlich", "Eigener Cron-Ausdruck", "Abbrechen")
     if ($choice -lt 0) { return }
@@ -205,7 +205,7 @@ function Set-ScheduleMenu {
     }
 
     Set-ConfigSchedule -Id $Id -Preset $preset -Cron $cron -Day $day
-    Sync-ScheduledTaskForConfig -Id $Id
+    if (-not $SkipSync) { Sync-ScheduledTaskForConfig -Id $Id }
 }
 
 function Show-VariablesMenu {

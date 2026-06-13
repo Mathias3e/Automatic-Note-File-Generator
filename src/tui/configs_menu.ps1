@@ -227,7 +227,7 @@ function Show-VariablesMenu {
             switch ($action) {
                 0 {
                     $curval = $config.variables.$key
-                    $newval = Text-Input "Neuer Wert für $key:" $curval
+                    $newval = Text-Input "Neuer Wert für ${key}:" $curval
                     Add-ConfigVariable -Id $Id -Key $key -Value $newval
                 }
                 1 {
@@ -239,7 +239,7 @@ function Show-VariablesMenu {
         } elseif ($choice -eq $count) {
             $newkey = Text-Input "Variablenname (ohne {{ }}):"
             if ([string]::IsNullOrWhiteSpace($newkey)) { continue }
-            $newval = Text-Input "Wert für $newkey:"
+            $newval = Text-Input "Wert für ${newkey}:"
             Add-ConfigVariable -Id $Id -Key $newkey -Value $newval
         } else {
             return

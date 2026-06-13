@@ -1,4 +1,4 @@
-# ANSI color codes (24-bit). Requires a VT100-capable console
+﻿# ANSI color codes (24-bit). Requires a VT100-capable console
 # (Windows Terminal or PowerShell 7+ on Windows 10+).
 
 $ESC = [char]27

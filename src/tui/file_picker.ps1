@@ -1,4 +1,4 @@
-# Arrow-key navigable file/folder browser.
+﻿# Arrow-key navigable file/folder browser.
 #
 # Select-FileOrFolder [-StartDir DIR] [-Mode file|dir]
 #   Mode "file" (default) - navigate into directories, pick a file

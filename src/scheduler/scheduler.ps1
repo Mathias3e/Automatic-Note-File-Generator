@@ -1,4 +1,4 @@
-# Sync a config's "active"/"schedule" state with Windows Task Scheduler.
+﻿# Sync a config's "active"/"schedule" state with Windows Task Scheduler.
 # Each managed task is named "ANFG_<config_id>" so it can be found/replaced/
 # removed without touching other scheduled tasks. This replaces cron.sh.
 #

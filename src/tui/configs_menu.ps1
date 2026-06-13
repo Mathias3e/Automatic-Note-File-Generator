@@ -1,4 +1,4 @@
-# Config management: list/create/edit configs, schedule and variables.
+﻿# Config management: list/create/edit configs, schedule and variables.
 
 function Edit-ConfigMenu {
     while ($true) {

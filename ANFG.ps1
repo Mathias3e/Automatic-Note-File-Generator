@@ -1,4 +1,8 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
+
+# Render umlauts/box-drawing/arrow characters correctly regardless of the
+# console's legacy codepage (Windows PowerShell 5.1 defaults to e.g. CP850/1252).
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 $global:ANFG_HOME = Split-Path -Parent $MyInvocation.MyCommand.Path
 $global:TEMPLATES_DIR = Join-Path $global:ANFG_HOME "templates"

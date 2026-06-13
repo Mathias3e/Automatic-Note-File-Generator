@@ -1,4 +1,4 @@
-# CRUD for config JSON files in $CONFIGS_DIR.
+﻿# CRUD for config JSON files in $CONFIGS_DIR.
 #
 # Schema (identical to the bash version):
 # {

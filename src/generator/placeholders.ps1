@@ -1,4 +1,4 @@
-# Placeholder substitution for template content and filenames.
+﻿# Placeholder substitution for template content and filenames.
 
 # Resolve-Placeholders TEXT CONFIG_ID
 # Returns TEXT with built-in placeholders and the config's custom

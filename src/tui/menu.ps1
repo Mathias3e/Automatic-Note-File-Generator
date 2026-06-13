@@ -1,4 +1,4 @@
-# Main menu.
+﻿# Main menu.
 
 function Show-MainMenu {
     while ($true) {

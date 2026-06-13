@@ -1,4 +1,4 @@
-function Write-MdEcho {
+﻿function Write-MdEcho {
     param([string]$Text)
 
     $modified = "$($global:C6)$Text$($global:CR)"

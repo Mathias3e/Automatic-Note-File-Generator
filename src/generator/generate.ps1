@@ -1,4 +1,4 @@
-# Render a config's template into its destination folder.
+﻿# Render a config's template into its destination folder.
 
 # Invoke-GenerateFromConfig CONFIG_ID
 function Invoke-GenerateFromConfig {

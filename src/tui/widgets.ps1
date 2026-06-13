@@ -1,4 +1,4 @@
-# Custom colored TUI widgets, built on [Console]::ReadKey.
+﻿# Custom colored TUI widgets, built on [Console]::ReadKey.
 #
 # NOT PORTED from the bash version: mouse-click selection (the bash menu
 # enabled terminal mouse reporting via "\e[?1000h" and could jump to an

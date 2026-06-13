@@ -1,4 +1,4 @@
-function Show-Logo {
+﻿function Show-Logo {
     Write-Host "$($global:C1) ██  ██   $($global:C2) █████   $($global:C3)███    ██  $($global:C4) ██████   $($global:C5)███████ $($global:CR)"
     Write-Host "$($global:C1)████████  $($global:C2)██▒▒▒██  $($global:C3)████   ██▒ $($global:C4)██▒▒▒▒▒▒  $($global:C5)██▒▒▒▒▒▒$($global:CR)"
     Write-Host "$($global:C1) ██▒▒██▒▒ $($global:C2)███████▒ $($global:C3)██▒██  ██▒ $($global:C4)██▒  ███  $($global:C5)█████   $($global:CR)"

@@ -67,12 +67,13 @@ function Text-Input {
     $chars = [System.Collections.Generic.List[char]]::new()
     if ($Default) { [void]$chars.AddRange([char[]]$Default) }
     $pos = $chars.Count
+    $clearToEol = "$([char]27)[K"
 
     [Console]::CursorVisible = $true
     try {
         while ($true) {
             [Console]::SetCursorPosition($startLeft, $startTop)
-            Write-Host -NoNewline "`e[K$(-join $chars)"
+            Write-Host -NoNewline "$clearToEol$(-join $chars)"
             [Console]::SetCursorPosition($startLeft + $pos, $startTop)
 
             $key = [Console]::ReadKey($true)

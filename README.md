@@ -85,7 +85,7 @@ This is also what the scheduled task executes in the background.
 ## How scheduling works on Windows
 
 Active configs are registered as Windows Scheduled Tasks named
-`ANFG_<config_id>`, triggered **`-AtLogOn`** (i.e. whenever you log in).
+`ANFG_<config_id>`, triggered **at logon** (i.e. whenever you log in).
 When the task runs, `ANFG.ps1 --run <config_id>`:
 
 1. For weekly/monthly schedules, checks whether today is the configured
@@ -97,6 +97,23 @@ When the task runs, `ANFG.ps1 --run <config_id>`:
 So a note appears shortly after you next log in on (or after) the scheduled
 day. You can inspect or manually trigger the task in Task Scheduler under the
 name `ANFG_<config_id>`.
+
+Registration uses the classic `Schedule.Service` COM API (the same one
+`schtasks.exe` uses), not the `ScheduledTasks` PowerShell module - the module
+talks to Task Scheduler via WMI/CIM, which is blocked by Group Policy on many
+managed/school PCs (`Register-ScheduledTask : Zugriff verweigert`,
+`0x80070005`) even for tasks in your own user context. The COM API uses a
+different RPC path that standard users can normally still use.
+
+If the COM registration *also* fails (fully locked-down machine), ANFG prints
+an error but still saves the config - you can still run it manually:
+```powershell
+.\ANFG.ps1 --run <config_id>
+```
+As a no-admin alternative to Task Scheduler entirely, you can place a
+shortcut to that command in your Startup folder (open it via `Win+R` ->
+`shell:startup`), which Windows runs at every logon without needing Task
+Scheduler permissions.
 
 ## Known limitations of the Windows port
 
@@ -110,17 +127,16 @@ Compared to the Bash/Linux version, a few things could not be ported 1:1:
   schedules run via a cron `@reboot` job that fires at every boot, even
   without anyone logging in. On Windows, running "at startup" without a
   logged-in user requires the scheduled task to run as SYSTEM/an elevated
-  account, which `Register-ScheduledTask` can only set up when the installer
-  itself runs elevated. To keep the installer usable without admin rights,
-  this port uses `-AtLogOn` instead. If you run the installer/PowerShell as
-  Administrator, you can change the trigger in
-  `src/scheduler/scheduler.ps1` to `New-ScheduledTaskTrigger -AtStartup` for
-  true "@reboot"-like behaviour.
+  account, which a standard user cannot register. To keep this usable without
+  admin rights, this port uses a logon trigger instead. If you run as
+  Administrator, you can change `$script:TASK_TRIGGER_LOGON` (and the
+  trigger creation call) in `src/scheduler/scheduler.ps1` to `8`
+  (`TASK_TRIGGER_BOOT`) for true "@reboot"-like behaviour.
 - **Custom cron expressions** - 5-field cron expressions (`min hour day
   month weekday`) have no direct equivalent in Windows Task Scheduler and are
   **not translated**. A config using the "Eigener Cron-Ausdruck" preset is
-  registered with the same `-AtLogOn` trigger as daily/weekly/monthly (i.e.
-  it runs once per login, every day); the raw cron string is only kept for
+  registered with the same logon trigger as daily/weekly/monthly (i.e. it
+  runs once per login, every day); the raw cron string is only kept for
   reference/round-trip compatibility with the Linux version.
 - **Colors/logo/Unicode** - require a VT100-capable terminal (Windows
   Terminal or PowerShell 7+). In legacy `powershell.exe`/conhost windows,

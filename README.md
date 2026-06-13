@@ -1,82 +1,162 @@
-### Important paths
-#### Linux
-- `/etc/Automatic-Note-File-Generator` | Benutzereinstellungen
-- `/bin/Automatic-Note-File-Generator` | Programcode
+# Automatic Note File Generator (ANFG) - PowerShell / Windows port
 
-#### Windows
-- `C:\Users\<user name>\AppData\Roaming` | benutzereinstellungen
-- `C:\Users\<user name>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs` | Programverlinkung
-- `C:\Users\<user name>\AppData\Local\Programs\` | Programcode
+ANFG is a small terminal app for automatically creating Markdown note files
+from templates on a schedule (daily, weekly, monthly, or on demand). You
+define one or more **configs**, each pointing at a template, a destination
+folder, a filename pattern, and a schedule - ANFG then takes care of creating
+the file at the right time and filling in placeholders like the current date.
 
-### echo2
-code:
-echo2 "Hallo {mUser} wie geht es dir?"
+This branch (`powershell-port`) is a port of the original Bash/Linux version
+to PowerShell for Windows. For the Linux/Bash version, see the `main` branch.
 
-output (User wird blau sien, {m} als markirung gedacht):
-Hallo User wie geht es dir?
+## Requirements
 
-#### dependency
+- Windows 10/11
+- **PowerShell 7+ (`pwsh`) recommended** for correct rendering of the
+  colored menu, logo, and Unicode arrows. Windows PowerShell 5.1 also works,
+  but in older `powershell.exe`/conhost windows the colors/symbols may not
+  render correctly - use [Windows Terminal](https://aka.ms/terminal) for the
+  best experience.
+- The built-in `ScheduledTasks` PowerShell module (included with Windows;
+  used to register scheduled runs instead of cron).
 
+## Installation
 
----
+1. Download or clone this repository (and stay on the `powershell-port`
+   branch).
+2. Open PowerShell (or `pwsh`) in the project folder.
+3. Run the installer:
+   ```powershell
+   .\ANFG_Install.ps1
+   ```
+   This creates the `templates/`, `configs/`, and `configs/.state/` folders.
+   If your system blocks running local scripts, you may need to allow it for
+   this session first:
+   ```powershell
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   ```
+4. Start the app:
+   ```powershell
+   .\ANFG.ps1
+   ```
 
-## Project:
-- 1 Script (instalation und programm)
-- kein .md im terminal
-- setings:
-    - haupt folder
-    - User name
-    - 
-- .link in windows menu
+## Usage
 
-## PowerShell-Port (Windows)
-Dieser Branch portiert alle `.sh`-Dateien nach `.ps1` (gleiche Ordnerstruktur,
-`src/cron` → `src/scheduler`). Einstiegspunkte: `ANFG_Install.ps1` (Setup) und
-`ANFG.ps1` (Programm, bzw. `ANFG.ps1 --run <config_id>` für geplante Läufe).
-`configs/*.json` und `templates/*.md` sind unverändert/identisch nutzbar.
+Running `.\ANFG.ps1` opens the main menu:
 
-Nicht bzw. nicht 1:1 portierbare Funktionalität:
-- **Mausklick-Auswahl im Menü** - die bash-Version aktiviert Terminal-Mausreporting
-  (`\e[?1000h`); unter Windows nicht zuverlässig verfügbar, daher nur Tastatur
-  (Pfeiltasten/Enter/q/Esc).
-- **Vorausgefüllte Eingabefelder** - `read -i` (bash) zeigt den Default editierbar
-  im Eingabefeld an. `Read-Host` kann das nicht; der Default wird nur als Hinweis
-  angezeigt und bei leerer Eingabe übernommen.
-- **„@reboot“-Zeitplan (täglich/wöchentlich/monatlich)** - unter Linux läuft der
-  Cron-Job bei jedem Boot und das Skript selbst prüft Tag + ob die Datei schon
-  existiert. Unter Windows würde "beim Systemstart, ohne Login" Admin-Rechte für
-  den Scheduled Task benötigen. Der Port registriert den Task daher mit
-  `-AtLogOn` (läuft bei Anmeldung des Benutzers); für echtes "@reboot"-Verhalten
-  müsste der Task mit Adminrechten auf `-AtStartup` umgestellt werden
-  (siehe `src/scheduler/scheduler.ps1`).
-- **„Eigener Cron-Ausdruck“ (custom preset)** - 5-Felder-Cron-Ausdrücke haben kein
-  Äquivalent in der Windows-Aufgabenplanung und werden NICHT übersetzt. Ein
-  custom-Config wird wie daily/weekly/monthly mit `-AtLogOn` registriert; der
-  Cron-String wird nur zur Anzeige/Kompatibilität mit der Linux-Version gespeichert.
-- **Farben/Logo** - benötigen ein VT100-fähiges Terminal (Windows Terminal oder
-  PowerShell 7+); in alten `powershell.exe`/conhost-Fenstern können Escape-Codes
-  oder Unicode-Symbole falsch dargestellt werden.
+- **Config hinzufügen** - create a new config: give it an ID and display
+  name, pick a template (from the `templates/` folder or from disk), pick a
+  destination folder, define the filename pattern, and choose a schedule.
+- **Config bearbeiten** - edit an existing config's name, template,
+  destination, filename pattern, schedule, or custom variables, and toggle it
+  active/inactive.
+- **Config löschen** - delete a config (and its scheduled task, if any).
+- **Beenden** - quit.
 
-## Ordner Strucktur
+### Placeholders
+
+Templates and filename patterns support the following placeholders, which are
+replaced when a note is generated:
+
+| Placeholder    | Replaced with                           |
+|-----------------|------------------------------------------|
+| `{{date}}`      | Current date, ISO format (`YYYY-MM-DD`)  |
+| `{{time}}`      | Current time (`HH:mm:ss`)                |
+| `{{timeshot}}`  | Current time (`HH:mm`)                   |
+| `{{datetime}}`  | `YYYY-MM-DD HH:mm`                       |
+| `{{your_var}}`  | Any custom variable defined per config   |
+
+### Schedules
+
+A config can be scheduled as **Täglich** (daily), **Wöchentlich** (weekly,
+pick a weekday), **Monatlich** (monthly, pick a day of month), or with a
+**custom cron expression** (kept for compatibility with the Linux version,
+see limitations below). No time of day is asked for - the note is generated
+as early as possible on the configured day.
+
+### Running a config manually / from a script
+
+```powershell
+.\ANFG.ps1 --run <config_id>
 ```
-Haupt Ordner/
+
+This is also what the scheduled task executes in the background.
+
+## How scheduling works on Windows
+
+Active configs are registered as Windows Scheduled Tasks named
+`ANFG_<config_id>`, triggered **`-AtLogOn`** (i.e. whenever you log in).
+When the task runs, `ANFG.ps1 --run <config_id>`:
+
+1. For weekly/monthly schedules, checks whether today is the configured
+   day - if not, it does nothing.
+2. Checks whether the target file already exists - if so, it does nothing
+   (so it won't recreate/overwrite a file you already have for today).
+3. Otherwise, renders the template and writes the new file.
+
+So a note appears shortly after you next log in on (or after) the scheduled
+day. You can inspect or manually trigger the task in Task Scheduler under the
+name `ANFG_<config_id>`.
+
+## Known limitations of the Windows port
+
+Compared to the Bash/Linux version, a few things could not be ported 1:1:
+
+- **Mouse selection in menus** - the Bash version enables terminal mouse
+  reporting (`\e[?1000h`) to let you click a menu option. This isn't reliably
+  available on Windows, so only keyboard navigation (arrow keys / Enter /
+  q / Esc) is supported.
+- **"@reboot" scheduling without login** - on Linux, daily/weekly/monthly
+  schedules run via a cron `@reboot` job that fires at every boot, even
+  without anyone logging in. On Windows, running "at startup" without a
+  logged-in user requires the scheduled task to run as SYSTEM/an elevated
+  account, which `Register-ScheduledTask` can only set up when the installer
+  itself runs elevated. To keep the installer usable without admin rights,
+  this port uses `-AtLogOn` instead. If you run the installer/PowerShell as
+  Administrator, you can change the trigger in
+  `src/scheduler/scheduler.ps1` to `New-ScheduledTaskTrigger -AtStartup` for
+  true "@reboot"-like behaviour.
+- **Custom cron expressions** - 5-field cron expressions (`min hour day
+  month weekday`) have no direct equivalent in Windows Task Scheduler and are
+  **not translated**. A config using the "Eigener Cron-Ausdruck" preset is
+  registered with the same `-AtLogOn` trigger as daily/weekly/monthly (i.e.
+  it runs once per login, every day); the raw cron string is only kept for
+  reference/round-trip compatibility with the Linux version.
+- **Colors/logo/Unicode** - require a VT100-capable terminal (Windows
+  Terminal or PowerShell 7+). In legacy `powershell.exe`/conhost windows,
+  escape codes or Unicode symbols may not render correctly.
+
+## Project structure
+
+```
+.
+├─ ANFG.ps1                    # Main entry point (menu, or --run <id>)
+├─ ANFG_Install.ps1            # Installer / first-time setup
 ├─ src/
-|  ├─ tui/
-|  |  └─ ...
-|  ├─ installation/
-|  |  └─ ...
-|  ├─ background/
-|  |  └─ ...
-|  ├─ config/
-|  |  └─ ...
-|  └─ main/
-|     └─ ...
-├─ configs/
-|  ├─ config1.json
-|  ├─ config2.json
-|  └─ ...
-└─ templates/
-   ├─ template1.md
-   ├─ template2.md
-   └─ ...
+│  ├─ tui/                     # Menus, widgets, colors, logo, config menus
+│  ├─ config/                  # Config CRUD (JSON via ConvertFrom/To-Json)
+│  ├─ scheduler/               # Windows Task Scheduler integration
+│  └─ generator/                # Template rendering & placeholder substitution
+├─ configs/                    # One JSON file per config
+│  └─ .state/                  # Per-config logs from scheduled runs
+└─ templates/                  # Markdown templates
 ```
+
+## Config file format
+
+Each config is a JSON file under `configs/`:
+
+```json
+{
+  "config_id": "example",
+  "name": "Example Note",
+  "active": true,
+  "template": "Template_BBZW.md",
+  "destination": "C:\\Users\\you\\Notes",
+  "filename": "{{date}}_Notiz.md",
+  "schedule": { "preset": "daily", "cron": "@reboot", "day": "" },
+  "variables": { "Lehrer": "Christian" }
+}
+```
+
+These files are interchangeable between the Linux and Windows versions.

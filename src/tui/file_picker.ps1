@@ -29,6 +29,15 @@ function Select-FileOrFolder {
         if ($parent -and $parent -ne $current) {
             $labels += "..\"
             $entries += $parent
+        } else {
+            # At a drive root - offer the other available drives instead of "..\"
+            Get-PSDrive -PSProvider FileSystem -ErrorAction SilentlyContinue | ForEach-Object {
+                $driveRoot = "$($_.Name):\"
+                if ($driveRoot -ne $current) {
+                    $labels += $driveRoot
+                    $entries += $driveRoot
+                }
+            }
         }
 
         Get-ChildItem -Path $current -Directory -ErrorAction SilentlyContinue |

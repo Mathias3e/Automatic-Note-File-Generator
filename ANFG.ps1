@@ -29,5 +29,14 @@ if ($args.Count -ge 2 -and $args[0] -eq "--run") {
     exit (Invoke-GenerateFromConfig -Id $args[1])
 }
 
+# Self-heal: make sure every active config has its scheduled task registered.
+# This matters for configs that were marked "active" in the JSON directly
+# (e.g. shipped/copied configs) and never went through a UI action that
+# calls Sync-ScheduledTaskForConfig. Sync is a no-op (just a quick
+# Get-ScheduledTask check) for configs whose task already exists.
+foreach ($id in Get-ConfigIds) {
+    Sync-ScheduledTaskForConfig -Id $id
+}
+
 Initialize-Terminal
 Show-MainMenu

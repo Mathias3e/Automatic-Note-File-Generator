@@ -49,6 +49,12 @@ function Sync-ScheduledTaskForConfig {
         return
     }
 
+    # The task always just runs "ANFG.ps1 --run <id>" - the day/weekday check
+    # and the existing-file check happen inside Invoke-GenerateFromConfig at
+    # run time, based on the live config. So once the task exists, changing
+    # the schedule preset/day doesn't require re-registering it.
+    if ($existingTask) { return }
+
     Write-Host "$($global:C4)Geplante Aufgabe wird aktualisiert ...$($global:CR)"
 
     if ($preset -eq "custom") {
